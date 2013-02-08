@@ -1,0 +1,49 @@
+DotNetRemote is a parser and marshalling module for python to work with Microsoft's .NET Remote protocol data. 
+
+It's not complete by parsing all kind of structures defined in the protocol, but it is all I was able to test. If you have more test data or error traces, please send them to me. I used it to check on direclty sniffed traffic and to send modified requests with urllib2 module. 
+
+Hot to use it:
+Import Modules
+
+	import DotNetRemote
+
+Parse Message:
+
+	data = IO.read_from_file("sample_reqest.dump")
+	c = {}		# Context Object contains the request of successful
+	if DotNetRemote.parse(c, data):
+		Log.info("Success.")
+	else:
+		Log.error("Failed.")
+
+At this point, you can modify, log, filter or whatever with it. It's easy to modify and send it.
+
+And the other way around:
+
+	
+	data = []
+	if DotNetRemote.marshall(c, data):
+		Log.log("Success")
+	else:
+		Log.error("Failed.")
+
+Responses can't be marshalled so far. I only checked them but never modified.
+
+Sample code to send the request:
+
+	req = urllib2.Request(URL, data)
+	req.add_header('User-Agent', 'Mozilla/4.0+(compatible; MSIE 6.0; Windows 6.1.0000.00000; MS .NET Remoting; MS .NET CLR 4.0.00000.1 )')
+	req.add_header('Content-Type', 'application/octet-stream')
+		
+	ret = None
+	try:
+		res = urllib2.urlopen(req, timeout=30)
+		ret = res.read()
+	except urllib2.HTTPError, error:
+		ret = error.read()
+	except socket.timeout:
+		Log.error('socket timeout')
+	except urllib2.URLError, error:
+		Log.error('urlib2 timeout')
+
+If you have feedback or patches, let me know. Dumps of Requests are also welcome by mail.
